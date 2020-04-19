@@ -3,35 +3,72 @@ package math;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 
+/**
+ * 2D repersentation of a plane on which LOSStar pathfinder is run on. This class allows for the addition of barriers
+ * @author Jeffrey
+ *
+ */
 public class Plane 
 {
 	private ArrayList<Line2D> barriers;
-	 
+	
+	/**
+	 * Constructor for Plane class
+	 */
     public Plane()
     { barriers = new ArrayList<>(); }
+    
+    /**
+     * Constructor for Plane using another Plane class
+     * @param other
+     */
+    public Plane(Plane other)
+    { barriers = other.getBarriers();}
 
-    public void addBarrier(Line2D line)
+    /**
+     * Adds a Line2D from Java.awt into the current Plane
+     * @param line the current Line
+     */
+    public final void addBarrier(Line2D line)
     { barriers.add(line); }
 
-    public void addBarrier(ArrayList<Line2D.Double> lines)
+    /**
+     * Adds a Collection of Line2D into the current Plane
+     * @param lines
+     */
+    public final void addBarrier(Collection<Line2D.Double> lines)
     { barriers.addAll(lines); }
-
-    public boolean LineOfSight(Point2D startPoint, Point2D endPoint)
+ 
+    /**
+     * Checks if the startPoint has direct line of sight to the endPoint. This means that there are not obstacles blocking it way
+     * @param startPoint the startingPoint
+     * @param endPoint the endingPoint
+     * @return true if their is line of sight false otherwise
+     */
+    public final boolean LineOfSight(Point2D startPoint, Point2D endPoint)
     {
         Line2D.Double intersectionLine = new Line2D.Double(startPoint,endPoint);
 
         for(Line2D currentLine : barriers)
             if(currentLine.intersectsLine(intersectionLine))
                 return false;
-        
         return true;
     }
 
-    public ArrayList<Line2D> getBarriers()
+    /**
+     * Gets all of the barriers on the current Plane
+     * @return Arraylist containing all of the barruers
+     */
+    public final ArrayList<Line2D> getBarriers()
     { return barriers; }
 
-    public ArrayList<Point2D> getKeyPoints(double mag)
+    /**
+     * Gets all of the endpoints on the current Plane. End points are at the end of each line Segment
+     * @return the End points of all lines in the plane
+     */
+    public final ArrayList<Point2D> getEndPoints()
     {
         ArrayList<Point2D> keyPoints = new ArrayList<>();
         
@@ -40,11 +77,16 @@ public class Plane
         	keyPoints.add(currentLine.getP1());
         	keyPoints.add(currentLine.getP2());
         }
-        
         return keyPoints;
     }
 
-    public ArrayList<Point2D> getPropagatedPoints(double mag) 
+    /**
+     * Gets all of the porpagated points on each Line. Propagated pointsare collinear with each on the Barriers but the are not on the line. 
+     * They are all offset from the line by the magnitude
+     * @param mag How far the progated points is from the endpoint
+     * @return All of the propagated point
+     */
+    public final ArrayList<Point2D> getPropagatedPoints(double mag) 
     {
         ArrayList<Point2D> propagatedPoint = new ArrayList<>();
 
@@ -54,7 +96,13 @@ public class Plane
         return propagatedPoint;
     }
     
-    private ArrayList<Point2D> getPropogatedEndPoints(Line2D line, double mag)
+    /**
+     * Gets the Propagated end point of the line by a mag
+     * @param line the line where the points are propogated
+     * @param mag the magnitue of propagation
+     * @return
+     */
+    public ArrayList<Point2D> getPropogatedEndPoints(Line2D line, double mag)
 	{
 		ArrayList<Point2D> propagatedPoints = new ArrayList<>();
 
@@ -84,4 +132,7 @@ public class Plane
 
         return propagatedPoints;
 	}
+
+    public String toString()
+    { return barriers.toString(); }
 }
