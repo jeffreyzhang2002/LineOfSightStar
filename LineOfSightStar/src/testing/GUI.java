@@ -1,4 +1,4 @@
-package main;
+package testing;
 
 import processing.core.PApplet;
 import java.awt.geom.Line2D;
@@ -18,7 +18,6 @@ public class GUI extends PApplet
     private Plane plane;
     private LOSStar pathfinder;
     
-    
     private ArrayList<Point2D> path;
     private Point2D startPoint;
     private Point2D endPoint;
@@ -29,19 +28,21 @@ public class GUI extends PApplet
     private ArrayList<Point2D> keyPoints;
     
     private final int pointSize = 2;
-    private final int mag = 5;
+    private final int mag = 50;
 
     public static void main(String[] args)
-    { PApplet.main("main.GUI"); }
+    { PApplet.main("testing.GUI"); }
 
     public void settings()
     {
     	plane = new Plane();
-    	startPoint = new Point2D.Double(250,100);
-    	endPoint = new Point2D.Double(250,400);
+    	startPoint = new Point2D.Double(250,50);
+    	endPoint = new Point2D.Double(250,450);
     	
-        plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 100), new Point2D.Double(400, 400)));
-        plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 400), new Point2D.Double(400, 100)));
+        plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 100), new Point2D.Double(400, 100)));
+        plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 400), new Point2D.Double(400, 400)));
+        plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 100), new Point2D.Double(100, 400)));
+        plane.addBarrier(new Line2D.Double(new Point2D.Double(400, 100), new Point2D.Double(400, 400)));
         
         keyPoints = plane.getPropagatedPoints(mag);
         
@@ -73,10 +74,12 @@ public class GUI extends PApplet
         point(startPoint, pointSize);
         point(endPoint, pointSize);
         
-
-        stroke(255,0,0);
-        for(int i=1; i< path.size(); i++)
-            line(path.get(i-1), path.get(i));
+        if(path != null)
+        {
+        	stroke(255,0,0);
+            for(int i=1; i< path.size(); i++)
+                line(path.get(i-1), path.get(i));
+        }
     }
 
     public void mousePressed()
@@ -93,11 +96,7 @@ public class GUI extends PApplet
     public void keyPressed() {
         
     	if(key == 'r')
-    	{
             path = pathfinder.generatePath(mag);
-            if(path == null)
-            	path = new ArrayList<>();
-    	}
         else if (key =='a' && canAddLine == true) {
             plane.addBarrier(new Line2D.Double(addLineP1, addLineP2));
             keyPoints = plane.getPropagatedPoints(mag);
