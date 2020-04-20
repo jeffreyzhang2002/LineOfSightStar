@@ -1,4 +1,4 @@
-package testing;
+package main;
 
 import processing.core.PApplet;
 import java.awt.geom.Line2D;
@@ -31,7 +31,7 @@ public class GUI extends PApplet
     private final int mag = 50;
 
     public static void main(String[] args)
-    { PApplet.main("testing.GUI"); }
+    { PApplet.main("main.GUI"); }
 
     public void settings()
     {
