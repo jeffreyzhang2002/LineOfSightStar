@@ -13,7 +13,7 @@ import pathfinder.LOSStar;
  * Controls: mousePressed = startLine, mouseReleased = endLine, a = add new generated line, r = regenerate path;
  * @author Jeffrey
  */
-public class GUI extends PApplet
+public class Testing extends PApplet
 {
     private Plane plane;
     private LOSStar pathfinder;
@@ -28,10 +28,10 @@ public class GUI extends PApplet
     private ArrayList<Point2D> keyPoints;
     
     private final int pointSize = 2;
-    private final int mag = 50;
+    private final int mag = 1;
 
     public static void main(String[] args)
-    { PApplet.main("main.GUI"); }
+    { PApplet.main("main.Testing"); }
 
     public void settings()
     {
