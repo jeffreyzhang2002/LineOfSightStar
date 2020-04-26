@@ -13,6 +13,10 @@ public class MenuBarRunActionListener implements ActionListener
     			FieldDisplay.pathfinder.setEnd(FieldDisplay.end);
     			FieldDisplay.path = FieldDisplay.pathfinder.generatePath(FieldDisplay.propagationMagnitude);
     		}
+    		else
+    		{
+    			FieldDisplay.unableToGeneratePathErrorMessage();
+    		}
     	} else if(e.getSource().equals(MenuBar.simulationMenu)) {
             System.out.println("simulation menu clicked");
         } else if(e.getSource().equals(MenuBar.stepMenu)) {

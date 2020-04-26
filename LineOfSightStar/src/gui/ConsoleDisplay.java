@@ -3,7 +3,7 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 
-class ConsoleDisplay extends JPanel
+class ConsoleDisplay extends JTextArea
 {
 	private static final long serialVersionUID = 1L;
 	

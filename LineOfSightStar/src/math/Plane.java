@@ -63,6 +63,12 @@ public class Plane
      */
     public final ArrayList<Line2D> getBarriers()
     { return barriers; }
+    
+    /**
+     * Clears the plane of all Items
+     */
+    public final void clearPlane()
+    { barriers.clear(); }
 
     /**
      * Gets all of the endpoints on the current Plane. End points are at the end of each line Segment

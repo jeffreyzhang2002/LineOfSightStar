@@ -9,9 +9,9 @@ class MainDisplay extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
-    FieldDisplay fieldContent = new FieldDisplay();
-    ConsoleDisplay consoleContent = new ConsoleDisplay();
-    Color borderColor = Color.white;
+    private FieldDisplay fieldContent = new FieldDisplay();
+    private ConsoleDisplay consoleContent = new ConsoleDisplay();
+    static Color borderColor = Color.white;
     
     public MainDisplay(Dimension dim)
     {

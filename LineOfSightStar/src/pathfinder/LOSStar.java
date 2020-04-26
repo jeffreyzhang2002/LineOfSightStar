@@ -41,6 +41,14 @@ public class LOSStar
         closedSet = new HashSet<>();
         cameFrom = new HashMap<>();
 
+        if(plane.LineOfSight(start, end))
+        {
+        	ArrayList<Point2D> path = new ArrayList<>();
+        	path.add(start);
+        	path.add(end);
+        	return path;
+        }
+        
         ArrayList<Point2D> keyPoints = plane.getPropagatedPoints(mag);
         keyPoints.add(start);
         keyPoints.add(end);

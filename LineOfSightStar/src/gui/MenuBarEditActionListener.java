@@ -6,8 +6,8 @@ import java.awt.event.ActionListener;
 public class MenuBarEditActionListener implements ActionListener
 {
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(MenuBar.gridSizeMenu)) {
-            System.out.println("grid size menu clicked");
+        if (e.getSource().equals(MenuBar.gridSizeMenu)) 
+        { FieldDisplay.changePropagationMagnitudePopUP();  
         } else if (e.getSource().equals(MenuBar.gridBackgroundMenu)) {
             System.out.println("grid background menu clicked");
         } else if (e.getSource().equals(MenuBar.addBarrierMenu)){
@@ -16,6 +16,8 @@ public class MenuBarEditActionListener implements ActionListener
         	FieldDisplay.canSetStart = true;
         } else if (e.getSource().equals(MenuBar.setEndMenu)){
         	FieldDisplay.canSetEnd = true;
+        } else if (e.getSource().equals(MenuBar.clearGridMenu)) {
+        	FieldDisplay.plane.clearPlane();
         }
     }
 }

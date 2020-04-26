@@ -12,11 +12,12 @@ public class MenuBar extends JMenuBar
         static final JMenuItem openMenu = new JMenuItem("Open");
     static final JMenu editMenu = new JMenu("Edit");
         static final JMenu gridMenu = new JMenu("Grid");
-            static final JMenuItem gridSizeMenu = new JMenuItem("Size");
+            static final JMenuItem gridSizeMenu = new JMenuItem("Propagation Radius");
             static final JMenuItem gridBackgroundMenu = new JMenuItem("Background");
         static final JMenuItem addBarrierMenu = new JMenuItem("Add Barrier");
         static final JMenuItem setStartMenu = new JMenuItem("Set Start");
         static final JMenuItem setEndMenu = new JMenuItem("Set End");
+        static final JMenuItem clearGridMenu = new JMenuItem("clear Grid");
     static final JMenu runMenu = new JMenu("Run");
     	static final JMenuItem generatePathMenu = new JMenuItem("Generate Path");
         static final JMenuItem simulationMenu = new JMenuItem("Simulation");
@@ -35,6 +36,7 @@ public class MenuBar extends JMenuBar
             editMenu.add(addBarrierMenu);
             editMenu.add(setStartMenu);
             editMenu.add(setEndMenu);
+            editMenu.add(clearGridMenu);
         super.add(runMenu);
         	runMenu.add(generatePathMenu);
             runMenu.add(simulationMenu);
@@ -56,6 +58,7 @@ public class MenuBar extends JMenuBar
         addBarrierMenu.addActionListener(editActionListener);
         setStartMenu.addActionListener(editActionListener);
         setEndMenu.addActionListener(editActionListener);
+        clearGridMenu.addActionListener(editActionListener);
 
         MenuBarRunActionListener runActionListener = new MenuBarRunActionListener();
         generatePathMenu.addActionListener(runActionListener);
