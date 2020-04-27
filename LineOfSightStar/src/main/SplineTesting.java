@@ -12,7 +12,7 @@ public class SplineTesting extends PApplet
 	public void settings()
 	{ size(500,500); }
 	
-	Spline spline = new CatmullSpline();
+	Spline spline = new BezierSpline();
 		
 	public void setup()
 	{ }
@@ -45,7 +45,18 @@ public class SplineTesting extends PApplet
 			rect(0,0,10,10);
 			popMatrix();
 		}
+		
+		stroke(255);
+		for(int i=1; i<spline.getControlPoints().size(); i++)
+		{
+			line(spline.getControlPoints().get(i-1),spline.getControlPoints().get(i));
+		}
 	
+	}
+	
+	public void line(Point2D p1, Point2D p2)
+	{
+		line((float)p1.getX(), (float)p1.getY(), (float)p2.getX(), (float)p2.getY());
 	}
 	
 	public void mousePressed()

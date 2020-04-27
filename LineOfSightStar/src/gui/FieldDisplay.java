@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 class FieldDisplay extends JPanel
 {
+	///// this is a test
 	private static final long serialVersionUID = 1L;
 	
 	static Plane plane = new Plane();
