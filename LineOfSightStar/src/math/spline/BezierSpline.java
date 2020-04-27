@@ -48,11 +48,15 @@ public class BezierSpline extends Spline
 		double increment = 1.0 / (double)splineResolution;
 		
 		splinePoints = new ArrayList<Point2D>(splineResolution);
+		vectors = new ArrayList<Point2D>(splineResolution);
 		
 		long[] pascals = pascals(super.controlPoints.size() - 1);
 		
 		for(double t=0; t < 1; t += increment)
-			splinePoints.add(generateSplinePoint(t, pascals));	
+		{
+			splinePoints.add(generateSplinePoint(t, pascals));
+			vectors.add(generateSplineGradient(t, pascals));
+		}
 	}
 	
 	/**
@@ -75,6 +79,27 @@ public class BezierSpline extends Spline
 			 y += value * super.controlPoints.get(i).getY();	
 		}
 		return new Point2D.Double(x,y);
+	}
+	
+	public Point2D generateSplineGradient(double t, long[] pascals)
+	{
+		double tPrime = 1-t;
+		int degree = super.controlPoints.size();
+		
+		double x = 0, y = 0;
+		
+		for(int i = 0; i < degree; i++)
+		{
+			 double value = pascals[i] * (Math.pow(tPrime, degree - i - 2) * Math.pow(t, i-1) * (i * tPrime - (degree-i-1) * t));
+			 x += value * super.controlPoints.get(i).getX();
+			 y += value * super.controlPoints.get(i).getY();	
+		}
+		return new Point2D.Double(x,y);
+	}
+	
+	public Point2D generateSplineGradient(double t)
+	{
+		return generateSplinePoint(t, pascals(super.controlPoints.size() - 1));
 	}
 	
 	public Point2D generateSplinePoint(double t)

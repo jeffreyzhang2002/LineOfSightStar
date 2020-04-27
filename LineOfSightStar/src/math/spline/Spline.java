@@ -9,6 +9,7 @@ public abstract class Spline
 {
 	LinkedList<Point2D> controlPoints;
 	ArrayList<Point2D> splinePoints;
+	ArrayList<Point2D> vectors;
 	int splineResolution = 100; 
 	
 	/**
@@ -22,6 +23,7 @@ public abstract class Spline
 	{
 		controlPoints = new LinkedList<Point2D>();
 		splinePoints = new ArrayList<Point2D>();
+		vectors = new ArrayList<Point2D>();
 		controlPoints.add(p1);
 		controlPoints.add(p2);
 		controlPoints.add(p3);
@@ -36,6 +38,7 @@ public abstract class Spline
 	{
 		controlPoints = new LinkedList<Point2D>();
 		splinePoints = new ArrayList<Point2D>();
+		vectors = new ArrayList<Point2D>();
 		controlPoints.addAll(addedpoints); 
 	}
 
@@ -46,6 +49,7 @@ public abstract class Spline
 	{
 		controlPoints = new LinkedList<Point2D>();
 		splinePoints = new ArrayList<Point2D>();
+		vectors = new ArrayList<Point2D>();
 	}
 	
 	/**
@@ -99,6 +103,13 @@ public abstract class Spline
 	{ return splinePoints; }
 	
 	/**
+	 * Gets all of the points on the spline. This will return an empty array until generate spline is called
+	 * @return
+	 */
+	public List<Point2D> getSplineGradient()
+	{ return vectors; }
+	
+	/**
 	 * Gets the Resolution of the spline points. The higher the resolution the more points generated
 	 * @return the resolution of the spline
 	 */
@@ -150,11 +161,13 @@ public abstract class Spline
 		double increment = 1.0 / (double)splineResolution;
 			
 		splinePoints = new ArrayList<Point2D>((int)(loopUpperBound() / increment) + 1);
+		vectors = new ArrayList<Point2D>((int)(loopUpperBound() / increment) + 1);
 		
 		for(double t=0; t < loopUpperBound(); t += increment)
-			splinePoints.add(generateSplinePoint(t));	
-		
-		splinePoints.trimToSize();
+		{
+			splinePoints.add(generateSplinePoint(t));
+			vectors.add(generateSplineGradient(t));
+		}
 	}
 	
 	/**
@@ -163,6 +176,8 @@ public abstract class Spline
 	 * @return the Point that is generated
 	 */
 	public abstract Point2D generateSplinePoint(double t);
+	
+	public abstract Point2D generateSplineGradient(double t);
 	
 	/**
 	 * Displays all of the spline points
