@@ -12,7 +12,7 @@ public class SplineTesting extends PApplet
 	public void settings()
 	{ size(500,500); }
 	
-	Spline spline = new BezierSpline();
+	Spline spline = new CatmullSpline();
 		
 	public void setup()
 	{ }
@@ -41,7 +41,6 @@ public class SplineTesting extends PApplet
 			Point2D g = spline.getSplinePoints().get(t);
 			translate((float)g.getX(), (float)g.getY());
 			double rotation = Math.atan2(p.getY(),p.getX());
-			System.out.println(Math.toDegrees(rotation));
 			rotate((float)rotation);
 			rect(0,0,10,10);
 			popMatrix();
@@ -61,6 +60,11 @@ public class SplineTesting extends PApplet
 			t ++;
 		else if(key == 'a')
 			t --;
+		
+		if(t < 0)
+			t = spline.getSplinePoints().size()-1;
+		else if(t >= spline.getSplinePoints().size())
+			t = 0;
 	}
 	
 	public void drawPoint(Point2D point)

@@ -109,8 +109,8 @@ public class CatmullSpline extends Spline
 		double tSquared = Math.pow(t, 2);
 				
 		Point2D.Double tp = new Point2D.Double(
-				(q2(p0,p1,p2,p3,true ) + q3(p0,p1,p2,p3,true ) * t + q4(p0,p1,p2,p3,true ) * tSquared)/2 ,
-				(q2(p0,p1,p2,p3,false) + q3(p0,p1,p2,p3,false) * t + q4(p0,p1,p2,p3,false) * tSquared)/2 );
+				(q2(p0,p1,p2,p3,true ) + 2*q3(p0,p1,p2,p3,true ) * t + 3*q4(p0,p1,p2,p3,true ) * tSquared)/2 ,
+				(q2(p0,p1,p2,p3,false) + 2*q3(p0,p1,p2,p3,false) * t + 3*q4(p0,p1,p2,p3,false) * tSquared)/2 );
 				
 		return tp;
 	}
