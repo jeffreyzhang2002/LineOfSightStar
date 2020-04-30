@@ -1,9 +1,7 @@
 package gui;
 
-import math.Plane;
-import pathfinder.LOSStar;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -11,241 +9,212 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import math.Plane;
+import rendering.LineRender;
+import rendering.PointRender;
+import rendering.RenderSettings;
 
-class FieldDisplay extends JPanel
+public class FieldDisplay extends JPanel
 {
-	///// this is a test
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7941993290002886144L;
 	
-	static Plane plane = new Plane();
-	static Point2D start = null;
-	static Point2D end = null;
-
-	static ArrayList<Point2D> path = null;
-	static LOSStar pathfinder = new LOSStar(plane, start, end);
+	private GUI gui;
+	private LineRender lineRender = new LineRender();
+	private PointRender pointRender = new PointRender();
 	
-	static Color pathColor = Color.BLUE;
-	static Color startPointColor = Color.GREEN;
-	static Color endPointColor = Color.ORANGE;
-	static Color dragLineColor = Color.YELLOW;
-	static Color barrierColor = Color.RED;
-	static Color keyPointColor = Color.WHITE; 
+	private RenderSettings barrierSettings = new RenderSettings(Color.RED, Color.RED);
+	private RenderSettings propagationPointsSettings = new RenderSettings(Color.WHITE, Color.WHITE);
+	private RenderSettings selectedItemSettings = new RenderSettings(Color.YELLOW, Color.YELLOW);
 	
-	static double propagationMagnitude = 5;
-	static int pointDiameters = 2;
+	Plane plane = new Plane();
 	
-	static boolean canEditLine = false;
-	static boolean canSetStart = false;
-	static boolean canSetEnd = false;
-	static boolean canDrawPath = true;
-	static boolean canDrawBarrier = true;
-	static boolean canDrawPropagatedpoints = true;
+	Line2D.Double selectedBarrier = null;
+	int selectedBarrierindex = 0;
 	
-	static Line2D.Double dragLine = null;
+	Point2D.Double selectedPathPoint = null;
+	int selectedPointindex;
 	
-	public FieldDisplay()
+	boolean canEditBarrierMode = false;
+	boolean canEditPathMode = false;
+	
+	public FieldDisplay(GUI gui)
 	{ 
-		super.setBackground(Color.BLACK); 
+		super.setBackground(Color.BLACK);
+		this.gui = gui; 
 		
-		FieldDisplayMouseActionListener actionListener = new FieldDisplayMouseActionListener();
-		super.addMouseListener(actionListener);
-		super.addMouseMotionListener(actionListener);
-		super.addMouseWheelListener(actionListener);
+		FieldDisplayMouseActionListener mouseListener = new FieldDisplayMouseActionListener();
+		super.addMouseListener(mouseListener);
+		super.addMouseMotionListener(mouseListener);
+		super.addMouseWheelListener(mouseListener);
 	}
 	
-    public void paint(Graphics g)
-    {
-    	super.paint(g);
-    	
-    	if(canDrawPropagatedpoints)
-    		paintPropagatedPoints(g);
-    	if(canDrawBarrier)
-    		paintBarriers((Graphics2D) g);
-    	if(dragLine != null && canEditLine)
-    		paintDragLine((Graphics2D) g);
-    	if(canDrawPath)
-    	{
-	    	if(start != null)
-	    		drawStartPoint(g);
-	    	if(end != null)
-	    		drawEndPoint(g);
-	    	if(path != null)
-	    		drawPath(g);
-    	}
-    }
-    
-    public void paintPropagatedPoints(Graphics g) 
-    {
-    	g.setColor(keyPointColor);
-    	for(Point2D point: plane.getPropagatedPoints(propagationMagnitude))
-    		g.drawOval((int)point.getX(), (int)point.getY(), pointDiameters, pointDiameters);	
-    }
+	public void paint(Graphics g)
+	{
+		super.paint(g);
+		paintBarriers(g);
+		paintPropagationPoints(g);
+		paintSelectedItems(g);
+	}
+	
+	public void paintBarriers(Graphics g)
+	{
+		lineRender.setRenderSettings(barrierSettings);
+		for(Line2D line : plane.getBarriers())
+			lineRender.render(line, g);
+	}
+	
+	public void paintPropagationPoints(Graphics g)
+	{
+		pointRender.setRenderSettings(propagationPointsSettings);
+		for(Point2D point : plane.getPropagatedPoints())
+			pointRender.render(point, g);
+			
+	}
+	
+	public void paintSelectedItems(Graphics g)
+	{
+		if(canEditBarrierMode && selectedBarrier != null)
+		{
+			lineRender.setRenderSettings(selectedItemSettings);
+			lineRender.render(selectedBarrier, g);
+		}
+		
+		if(canEditPathMode && selectedPathPoint != null)
+		{
+			pointRender.setRenderSettings(selectedItemSettings);
+			pointRender.render(selectedPathPoint, g);
+		}
+	}
+	
+	public void removeBarrier(int index)
+	{
+		plane.removeBarrier(index);
+		gui.main.barriersContent.updateBarrierButtons();
+		updateUI();
+	}
+	
+	public void addBarrier(Line2D barrier)
+	{
+		plane.addBarrier(barrier);
+		gui.main.barriersContent.addBarrier(barrier);
+		updateUI();
+	}
+	
+	public void setEditBarrierMode(boolean canEdit)
+	{
+		canEditBarrierMode = canEdit;
+		if(canEdit)
+			canEditPathMode = false;
+		resetEditing();
+	}
+	
+	public void setEditPathMode(boolean canEdit)
+	{
+		canEditPathMode = canEdit;
+		if(canEdit)
+			canEditBarrierMode = false;
+		resetEditing();
+	}
+	
+	private void resetEditing()
+	{
+		selectedPointindex = 0;
+		selectedBarrierindex = 0;
+		selectedBarrier = null;
+		selectedPathPoint = null;
+	}
+	
+	private class FieldDisplayMouseActionListener implements MouseListener, MouseMotionListener, MouseWheelListener
+	{	
+		private boolean inDraggingMode = false;
+		
+		public void mouseWheelMoved(MouseWheelEvent e) 
+		{
+			if(canEditBarrierMode)
+			{
+				if(plane.getBarriers().size() == 0)
+	    			return;
+				
+				gui.main.barriersContent.barrierButtons.get(selectedBarrierindex).setBackground(Color.WHITE);
+				
+	    		if(e.getWheelRotation() < 0)
+	    			selectedBarrierindex++;
+	    		else
+	    			selectedBarrierindex--;
+	    		
+	    		if(selectedBarrierindex < 0)
+	    			selectedBarrierindex = plane.getBarriers().size()-1;
+	    		else if(selectedBarrierindex >= plane.getBarriers().size())
+	    			selectedBarrierindex = 0;
+	    		
+	    		gui.main.barriersContent.barrierButtons.get(selectedBarrierindex).setBackground(Color.YELLOW);
+	    		
+	    		selectedBarrier = (Line2D.Double) plane.getBarriers().get(selectedBarrierindex); 
+			}
+			else if(canEditPathMode)
+			{
+				
+			}
+    		updateUI();
+		}
 
-    public void paintBarriers(Graphics2D g)
-    {
-    	g.setColor(barrierColor);
-    	for(Line2D line: plane.getBarriers())
-    		g.draw(line);
-    }
-    
-    public void paintDragLine(Graphics2D g)
-    {
-    	g.setColor(dragLineColor);
-    	g.draw(dragLine);
-    }
-    
-    public void drawPath(Graphics g)
-    {
-    	for(int i=1; i< path.size(); i++)
-    		drawPathLine(g,path.get(i-1), path.get(i));
-    }
-    
-    public void drawPathLine(Graphics g, Point2D start, Point2D end)
-    {
-    	g.setColor(pathColor);
-    	g.drawLine((int)start.getX(), (int)start.getY(), (int)end.getX(), (int)end.getY());
-    }
-    
-    public void drawStartPoint(Graphics g)
-    {
-    	g.setColor(startPointColor);
-		g.drawOval((int)start.getX(), (int)start.getY(), pointDiameters, pointDiameters);
-    }
-    
-    public void drawEndPoint(Graphics g)
-    {
-    	g.setColor(endPointColor);
-		g.drawOval((int)end.getX(), (int)end.getY(), pointDiameters, pointDiameters);
-    }
-
-    public static void changePropagationMagnitudePopUP()
-    {
-    	JFrame frame = new JFrame();
-    	double value;
-    	String string = (String)JOptionPane.showInputDialog(
-    	                    frame,
-    	                    "Enter a Postive Number",
-    	                    "Change Propagation Magnitude",
-    	                    JOptionPane.PLAIN_MESSAGE,
-    	                    null,
-    	                    null,
-    	                    propagationMagnitude + "");
-    	try {
-    		value = Double.parseDouble(string);
-    		if(value > 0)
-    			propagationMagnitude = value;
-    		else
-    			changePropagationErrorMessage(frame);
-    	}
-    	catch(Exception e)
-    	{
-    		changePropagationErrorMessage(frame);
-    	}
-    }
-    
-    private static void changePropagationErrorMessage(JFrame frame)
-    {
-    	JOptionPane.showMessageDialog(frame,
-    		    "Propagation magnitude must be a postive number",
-    		    "ERROR",
-    		    JOptionPane.ERROR_MESSAGE);
-    }
-    
-    public static void unableToGeneratePathErrorMessage()
-    {
-    	JFrame frame = new JFrame();
-    	JOptionPane.showMessageDialog(frame,
-    		    "Unable to Generate Path! \n Make sure start and end points are defined",
-    		    "Path Generation Warning",
-    		    JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public class FieldDisplayMouseActionListener implements MouseListener, MouseMotionListener, MouseWheelListener
-    {
-    	private int index = 0;
-    	    	
-    	public void mouseDragged(MouseEvent e) 
-    	{
-    		if(SwingUtilities.isLeftMouseButton(e))
+		public void mouseDragged(MouseEvent e) 
+		{
+			if(inDraggingMode && selectedBarrier != null && SwingUtilities.isLeftMouseButton(e))
     		{
-    			dragLine.x2 = e.getX();
-    			dragLine.y2 = e.getY();
+    			selectedBarrier.x2 = e.getX();
+    			selectedBarrier.y2 = e.getY();
     			updateUI();
     		}
-    	}
+		}
 
-    	public void mouseMoved(MouseEvent e) 
-    	{
-    		
-    	}
+		public void mouseMoved(MouseEvent e) 
+		{
+			
+		}
 
-    	public void mouseClicked(MouseEvent e) 
-    	{
-    		if(SwingUtilities.isRightMouseButton(e) && !plane.getBarriers().isEmpty())
+		public void mouseClicked(MouseEvent e)
+		{
+			if(SwingUtilities.isRightMouseButton(e) && !plane.getBarriers().isEmpty())
     		{
-    			plane.getBarriers().remove(index);
-    			dragLine = null;
-    		}
-    		else if(FieldDisplay.canSetStart)
-    		{
-    			FieldDisplay.start = e.getPoint();
-    			FieldDisplay.canSetStart = false;
-    		} 
-    		else if(FieldDisplay.canSetEnd) 
-    		{
-    			end = e.getPoint();
-    			FieldDisplay.canSetEnd = false;
-    		}
-    		updateUI();
-    	}
-
-    	public void mousePressed(MouseEvent e) 
-    	{
-    		if(SwingUtilities.isLeftMouseButton(e))
-    			dragLine = new Line2D.Double(e.getPoint(),e.getPoint());
-    	}
-
-    	public void mouseReleased(MouseEvent e) 
-    	{
-    		if(FieldDisplay.canEditLine && SwingUtilities.isLeftMouseButton(e))
-    		{
-    			plane.addBarrier(dragLine);
-    			dragLine = null;
+    			removeBarrier(selectedBarrierindex);
+    			selectedBarrier = null;
+    			selectedBarrierindex = 0;
     			updateUI();
     		}
-    	}
+		}
 
-    	public void mouseEntered(MouseEvent e)
-    	{
-    		updateUI();
-    	}
+		public void mousePressed(MouseEvent e) 
+		{
+			if(canEditBarrierMode && SwingUtilities.isLeftMouseButton(e))
+			{
+    			selectedBarrier = new Line2D.Double(e.getPoint(), e.getPoint());
+    			inDraggingMode = true;
+			}
+		}
 
-    	public void mouseExited(MouseEvent e) 
-    	{
-    		FieldDisplay.canEditLine = false;
-    		FieldDisplay.canSetStart = false;
-    		FieldDisplay.canSetEnd = false;
-    	}
+		public void mouseReleased(MouseEvent e) 
+		{
+			if(selectedBarrier != null && SwingUtilities.isLeftMouseButton(e))
+			{
+				addBarrier(selectedBarrier);
+				selectedBarrier = null;
+				inDraggingMode = false;
+			}
+		}
 
-    	public void mouseWheelMoved(MouseWheelEvent e) 
-    	{
-    		if(plane.getBarriers().size() == 0)
-    			return;
-    		
-    		if(e.getWheelRotation() < 0)
-    			index++;
-    		else
-    			index--;
-    		
-    		if(index < 0)
-    			index = plane.getBarriers().size()-1;
-    		else if(index >= plane.getBarriers().size())
-    			index = 0;
-    		
-    		dragLine = (Line2D.Double) plane.getBarriers().get(index); 
-    		updateUI();
-    	}
-    }
+		public void mouseEntered(MouseEvent e) 
+		{
+			
+		}
 
+		public void mouseExited(MouseEvent e) 
+		{
+			selectedBarrier = null;
+			inDraggingMode = false;
+			updateUI();
+		}
+	}
 }

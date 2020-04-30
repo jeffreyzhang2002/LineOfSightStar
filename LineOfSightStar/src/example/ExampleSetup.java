@@ -24,10 +24,11 @@ public class ExampleSetup
 	    
 	    plane.addBarrier(wall1);
 	    plane.addBarrier(wall2);
+	    plane.setPropagationMagnitude(offsetmagnitude);
 	    
 	    LOSStar pathfinder = new LOSStar(plane, startPoint, endPoint);
 	    
-	    System.out.println(pathfinder.generatePath(offsetmagnitude));
+	    System.out.println(pathfinder.generatePath());
 	    
 	}
 }

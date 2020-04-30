@@ -13,12 +13,29 @@ import java.util.Collection;
 public class Plane 
 {
 	private ArrayList<Line2D> barriers;
+	private ArrayList<Point2D> propagatedPoints;
+	private double mag;
 	
 	/**
 	 * Constructor for Plane class
 	 */
     public Plane()
-    { barriers = new ArrayList<>(); }
+    { 
+    	barriers = new ArrayList<>();
+    	propagatedPoints = new ArrayList<>();
+    	mag = 10;
+    }
+    
+    /** 
+     * Constructore to create a plane with propagation magnitude
+     * @param mag
+     */
+    public Plane(double mag)
+    { 
+    	barriers = new ArrayList<>();
+    	propagatedPoints = new ArrayList<>();
+    	this.mag = mag;
+    }
     
     /**
      * Constructor for Plane using another Plane class
@@ -32,15 +49,43 @@ public class Plane
      * @param line the current Line
      */
     public final void addBarrier(Line2D line)
-    { barriers.add(line); }
+    { 
+    	barriers.add(line); 
+    	propagatedPoints.addAll(calculatePropogatedEndPoints(line));
+    }
 
     /**
      * Adds a Collection of Line2D into the current Plane
      * @param lines
      */
     public final void addBarrier(Collection<Line2D.Double> lines)
-    { barriers.addAll(lines); }
+    { 
+    	barriers.addAll(lines);
+    	for(Line2D.Double l : lines)
+    		propagatedPoints.addAll(calculatePropogatedEndPoints(l));
+    }
+    
+    /**
+     * Removes the barrier at the give index
+     * @param index
+     */
+    public final void removeBarrier(int index)
+    {
+    	barriers.remove(index);
+    	recalculatePropagatedPoints();
+    }
  
+    /**
+     * Sets the barrier at the given index to the given line
+     * @param index
+     * @param line
+     */
+    public final void setBarrier(int index, Line2D line)
+    {
+    	barriers.set(index, line);
+    	recalculatePropagatedPoints();
+    }
+    
     /**
      * Checks if the startPoint has direct line of sight to the endPoint. This means that there are not obstacles blocking it way
      * @param startPoint the startingPoint
@@ -69,7 +114,7 @@ public class Plane
      */
     public final void clearPlane()
     { barriers.clear(); }
-
+    
     /**
      * Gets all of the endpoints on the current Plane. End points are at the end of each line Segment
      * @return the End points of all lines in the plane
@@ -85,21 +130,23 @@ public class Plane
         }
         return keyPoints;
     }
-
+    
     /**
      * Gets all of the porpagated points on each Line. Propagated pointsare collinear with each on the Barriers but the are not on the line. 
      * They are all offset from the line by the magnitude
-     * @param mag How far the progated points is from the endpoint
      * @return All of the propagated point
      */
-    public final ArrayList<Point2D> getPropagatedPoints(double mag) 
+    public final ArrayList<Point2D> getPropagatedPoints() 
+    { return propagatedPoints; }
+    
+    /**
+     * recalculates the the location of the propagated end points for all of the line using the propagation radius
+     */
+    public final void recalculatePropagatedPoints()
     {
-        ArrayList<Point2D> propagatedPoint = new ArrayList<>();
-
-        for(Line2D currentLine: barriers)
-        	propagatedPoint.addAll(getPropogatedEndPoints(currentLine, mag));
-        
-        return propagatedPoint;
+    	propagatedPoints = new ArrayList<>();
+    	for(Line2D currentLine: barriers)
+    		propagatedPoints.addAll(calculatePropogatedEndPoints(currentLine));
     }
     
     /**
@@ -108,9 +155,18 @@ public class Plane
      * @param mag the magnitue of propagation
      * @return
      */
-    public ArrayList<Point2D> getPropogatedEndPoints(Line2D line, double mag)
-	{
-		ArrayList<Point2D> propagatedPoints = new ArrayList<>();
+    public ArrayList<Point2D> calculatePropogatedEndPoints(Line2D line)
+	{ return calculatePropagatedEndPoints(line, mag); }
+
+    /**
+     * Calculate the Propagated end points given a line and a magnitude
+     * @param line
+     * @param mag
+     * @return
+     */
+    public static ArrayList<Point2D> calculatePropagatedEndPoints(Line2D line, double mag)
+    {
+    	ArrayList<Point2D> propagatedPoints = new ArrayList<>();
 
         double angle = Math.atan2(line.getY2() - line.getY1(), line.getX2() - line.getX1());
 
@@ -137,8 +193,25 @@ public class Plane
         propagatedPoints.add(P2);
 
         return propagatedPoints;
-	}
-
+    }
+    
+    /**
+     * Sets the propagation Magnitude
+     * @param mag
+     */
+    public void setPropagationMagnitude(double mag)
+    { 
+    	this.mag = mag; 
+    	recalculatePropagatedPoints();
+    }
+    
+    /**
+     * Gets how far the the points are propagated away from the end points
+     * @return
+     */
+    public double getPropagationMagnitude()
+    { return mag; }
+    
     public String toString()
     { return barriers.toString(); }
 }

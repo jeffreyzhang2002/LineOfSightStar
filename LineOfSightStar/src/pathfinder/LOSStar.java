@@ -35,7 +35,7 @@ public class LOSStar
      * @param mag how far points are offset from the end points of each line segment
      * @return the optimal path
      */
-    public final ArrayList<Point2D> generatePath(double mag)
+    public final ArrayList<Point2D> generatePath()
     {
         openSet = new PriorityQueue<>();
         closedSet = new HashSet<>();
@@ -49,7 +49,7 @@ public class LOSStar
         	return path;
         }
         
-        ArrayList<Point2D> keyPoints = plane.getPropagatedPoints(mag);
+        ArrayList<Point2D> keyPoints = plane.getPropagatedPoints();
         keyPoints.add(start);
         keyPoints.add(end);
 

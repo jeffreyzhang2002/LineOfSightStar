@@ -3,28 +3,43 @@ package rendering;
 import java.awt.Color;
 import java.awt.Graphics;
 
-public abstract class Render 
+public abstract class Render<E> 
 {
-	Color strokeColor;
-	Color fillColor;
+	E renderObject;
+	RenderSettings renderSetting;
 	
-	public Render(Color strokeColor, Color fillColor)
+	public Render(E renderObject, Color fillColor, Color strokeColor)
 	{
-		this.strokeColor = strokeColor;
-		this.fillColor = fillColor;
+		this.renderObject = renderObject;
+		renderSetting = new RenderSettings(fillColor, strokeColor);
+	}
+	
+	public Render(E renderObject)
+	{
+		this.renderObject = renderObject;
+		renderSetting = new RenderSettings();
 	}
 	
 	public Render()
 	{
-		strokeColor = Color.BLACK;
-		fillColor = Color.BLACK;
+		renderObject = null;
+		renderSetting = new RenderSettings();
 	}
 	
+	public void set(E renderObject)
+	{ this.renderObject = renderObject; }
+	
+	public E get()
+	{ return renderObject; }
+	
 	public final void setFill(Color fillColor)
-	{ this.fillColor = fillColor; }
+	{ renderSetting.setFillColor(fillColor); }
 	
 	public final void setStroke(Color strokeColor)
-	{ this.strokeColor = strokeColor; }
+	{ renderSetting.setStrokeColor(strokeColor); }
+	
+	public final void setRenderSettings(RenderSettings renderSetting)
+	{ this.renderSetting = renderSetting; }
 	
 	public final void render(Graphics g)
 	{
@@ -32,15 +47,21 @@ public abstract class Render
 		renderBody(g);
 	}
 	
+	public final void render(E renderObject, Graphics g)
+	{
+		this.renderObject = renderObject;
+		render(g);
+	}
+	
 	public final void renderBody(Graphics g)
 	{
-		g.setColor(fillColor);
+		g.setColor(renderSetting.getFillColor());
 		drawBody(g);
 	}
 	
 	public final void renderEdge(Graphics g)
 	{
-		g.setColor(strokeColor);
+		g.setColor(renderSetting.getStrokeColor());
 		drawEdge(g);
 	}
 	

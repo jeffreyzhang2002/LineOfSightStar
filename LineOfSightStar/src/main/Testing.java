@@ -36,6 +36,7 @@ public class Testing extends PApplet
     public void settings()
     {
     	plane = new Plane();
+    	plane.setPropagationMagnitude(10);
     	startPoint = new Point2D.Double(250,50);
     	endPoint = new Point2D.Double(250,450);
     	
@@ -44,10 +45,10 @@ public class Testing extends PApplet
         plane.addBarrier(new Line2D.Double(new Point2D.Double(100, 100), new Point2D.Double(100, 400)));
         plane.addBarrier(new Line2D.Double(new Point2D.Double(400, 100), new Point2D.Double(400, 400)));
         
-        keyPoints = plane.getPropagatedPoints(mag);
+        keyPoints = plane.getPropagatedPoints();
         
         pathfinder = new LOSStar(plane, startPoint, endPoint);
-        path = pathfinder.generatePath(mag);
+        path = pathfinder.generatePath();
         size(500,500);
     }
 
@@ -96,10 +97,10 @@ public class Testing extends PApplet
     public void keyPressed() {
         
     	if(key == 'r')
-            path = pathfinder.generatePath(mag);
+            path = pathfinder.generatePath();
         else if (key =='a' && canAddLine == true) {
             plane.addBarrier(new Line2D.Double(addLineP1, addLineP2));
-            keyPoints = plane.getPropagatedPoints(mag);
+            keyPoints = plane.getPropagatedPoints();
             canAddLine = false;
         }
     }
